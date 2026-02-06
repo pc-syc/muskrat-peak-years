@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peak Year Average Muskrat House Count - Peace Athabasca Delta</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Peace Athabasca Delta - Average Muskrat House Count</h1>
+            <h2>Peak Year</h2>
+        </header>
+
+        <main>
+            <div class="controls-top">
+                <div class="threshold-display">
+                    <label>Threshold:</label>
+                    <input type="number" id="thresholdInput" step="0.1">
+                    <span id="percentileDisplay"></span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+
+            <div class="filter-section">
+                <label for="subdeltaSelect">Select Sub-delta:</label>
+                <select id="subdeltaSelect"></select>
+            </div>
+
+            <div class="statistics">
+                <div class="stat-box above">
+                    <h3>Above Threshold</h3>
+                    <div class="stat-values">
+                        <span class="count" id="aboveCount">0</span>
+                        <span class="percentage" id="abovePercentage">0%</span>
+                    </div>
+                </div>
+                <div class="stat-box below">
+                    <h3>Below Threshold</h3>
+                    <div class="stat-values">
+                        <span class="count" id="belowCount">0</span>
+                        <span class="percentage" id="belowPercentage">0%</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
