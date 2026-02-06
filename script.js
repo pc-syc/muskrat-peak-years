@@ -102,16 +102,39 @@ function init() {
         updateStatistics();
     });
     
-    document.getElementById('thresholdInput').addEventListener('input', (e) => {
-        const value = parseFloat(e.target.value);
-        if (!isNaN(value)) {
-            const min = Math.min(...filteredData.map(d => d.houseCount));
-            const max = Math.max(...filteredData.map(d => d.houseCount));
-            thresholdValue = Math.max(min, Math.min(max, value));
-            drawChart();
-            updateStatistics();
+    const thresholdInput = document.getElementById('thresholdInput');
+    
+    // Handle input changes
+    thresholdInput.addEventListener('change', handleThresholdInput);
+    thresholdInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            handleThresholdInput(e);
         }
     });
+    
+    function handleThresholdInput(e) {
+        const value = parseFloat(e.target.value);
+        const min = Math.min(...filteredData.map(d => d.houseCount));
+        const max = Math.max(...filteredData.map(d => d.houseCount));
+        
+        if (isNaN(value) || e.target.value.trim() === '') {
+            alert('Please enter a valid number');
+            e.target.value = Math.round(thresholdValue);
+            return;
+        }
+        
+        if (value < min) {
+            thresholdValue = min;
+        } else if (value > max) {
+            thresholdValue = max;
+        } else {
+            thresholdValue = value;
+        }
+        
+        e.target.value = Math.round(thresholdValue);
+        drawChart();
+        updateStatistics();
+    }
     
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mousemove', handleMouseMove);
@@ -285,6 +308,7 @@ function drawChart() {
 
 function handleMouseDown(e) {
     const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
     const houseCounts = filteredData.map(d => d.houseCount);
@@ -300,10 +324,10 @@ function handleMouseDown(e) {
     
     const thresholdY = scaleY(thresholdValue);
     
-    // Check if click is near threshold line
-    if (Math.abs(mouseY - thresholdY) < 10 && 
-        e.clientX - rect.left >= chartArea.x && 
-        e.clientX - rect.left <= chartArea.x + chartArea.width) {
+    // Check if click is near threshold line (using cursor center)
+    if (Math.abs(mouseY - thresholdY) < 15 && 
+        mouseX >= chartArea.x && 
+        mouseX <= chartArea.x + chartArea.width) {
         isDragging = true;
         canvas.style.cursor = 'ns-resize';
     }
@@ -351,14 +375,14 @@ function handleMouseMove(e) {
         
         const thresholdY = scaleY(thresholdValue);
         
-        // Check for point hover
+        // Check for point hover with larger detection radius
         let foundPoint = false;
         for (let i = 0; i < filteredData.length; i++) {
             const x = scaleX(i);
             const y = scaleY(filteredData[i].houseCount);
             const distance = Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
             
-            if (distance < 8) {
+            if (distance < 20) {  // Increased from 8 to 20 for easier hovering
                 foundPoint = true;
                 tooltip.style.display = 'block';
                 tooltip.style.left = (e.clientX + 10) + 'px';
@@ -372,8 +396,8 @@ function handleMouseMove(e) {
         if (!foundPoint) {
             tooltip.style.display = 'none';
             
-            // Change cursor when hovering over threshold line
-            if (Math.abs(mouseY - thresholdY) < 10 && 
+            // Change cursor when hovering over threshold line (using cursor center)
+            if (Math.abs(mouseY - thresholdY) < 15 && 
                 mouseX >= chartArea.x && 
                 mouseX <= chartArea.x + chartArea.width) {
                 canvas.style.cursor = 'ns-resize';
