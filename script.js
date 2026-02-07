@@ -88,14 +88,16 @@ function init() {
         updateStatistics();
     });
     
-    document.getElementById('thresholdInput').addEventListener('input', (e) => {
-        const value = parseInt(e.target.value);
-        if (!isNaN(value)) {
-            const min = Math.min(...filteredData.map(d => Math.round(d.houseCount)));
-            const max = Math.max(...filteredData.map(d => Math.round(d.houseCount)));
-            thresholdValue = Math.max(min, Math.min(max, value));
-            drawChart();
-            updateStatistics();
+    document.getElementById('thresholdInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const value = parseInt(e.target.value);
+            if (!isNaN(value)) {
+                const min = Math.min(...filteredData.map(d => Math.round(d.houseCount)));
+                const max = Math.max(...filteredData.map(d => Math.round(d.houseCount)));
+                thresholdValue = Math.max(min, Math.min(max, value));
+                drawChart();
+                updateStatistics();
+            }
         }
     });
     
@@ -135,6 +137,13 @@ function setInitialThreshold() {
 function calculatePercentile(value) {
     const sorted = [...filteredData].map(d => Math.round(d.houseCount)).sort((a, b) => a - b);
     const totalCount = sorted.length;
+    const maxValue = Math.max(...sorted);
+    
+    // If at max value, return 100th percentile
+    if (value >= maxValue) {
+        return 100;
+    }
+    
     let countBelow = 0;
     
     for (let i = 0; i < sorted.length; i++) {
@@ -406,8 +415,19 @@ function handleMouseUp() {
 
 function updateStatistics() {
     const roundedCounts = filteredData.map(d => Math.round(d.houseCount));
-    const above = roundedCounts.filter(count => count > thresholdValue).length;
-    const below = roundedCounts.filter(count => count <= thresholdValue).length;
+    const minValue = Math.min(...roundedCounts);
+    
+    let above, below;
+    
+    // If threshold is at minimum, all points are above (none below or equal)
+    if (thresholdValue <= minValue) {
+        above = roundedCounts.length;
+        below = 0;
+    } else {
+        above = roundedCounts.filter(count => count > thresholdValue).length;
+        below = roundedCounts.filter(count => count <= thresholdValue).length;
+    }
+    
     const total = filteredData.length;
     
     document.getElementById('aboveCount').textContent = above;

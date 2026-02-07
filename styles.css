@@ -69,6 +69,17 @@ h2 {
     font-size: 14px;
 }
 
+/* Hide spinner arrows */
+#thresholdInput::-webkit-outer-spin-button,
+#thresholdInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#thresholdInput[type=number] {
+    -moz-appearance: textfield;
+}
+
 #thresholdInput:focus {
     outline: none;
     border-color: #4a90e2;
